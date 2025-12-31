@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy New Year!</title>
+    <style>
+        :root {
+            --primary: #ff0055;
+            --secondary: #00ddff;
+            --bg: #050505;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            background-color: var(--bg);
+            background-image: 
+                radial-gradient(circle at 50% 50%, rgba(20, 20, 40, 0.8), #000),
+                url('https://www.transparenttextures.com/patterns/stardust.png');
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            perspective: 1000px; /* Essential for 3D */
+        }
+
+        /* The 3D Card Container */
+        .card-container {
+            position: relative;
+            width: 300px;
+            height: 400px;
+            transform-style: preserve-3d;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .card {
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            box-shadow: 
+                0 0 20px rgba(0, 221, 255, 0.3),
+                0 0 50px rgba(255, 0, 85, 0.2),
+                inset 0 0 20px rgba(255, 255, 255, 0.1);
+            transform: rotateY(0deg) rotateX(0deg);
+            transition: transform 0.1s;
+        }
+
+        /* 3D Elements inside the card */
+        h1 {
+            color: white;
+            font-size: 3rem;
+            margin: 0;
+            text-transform: uppercase;
+            text-shadow: 
+                0 0 5px var(--secondary),
+                0 0 10px var(--secondary),
+                0 0 20px var(--primary);
+            transform: translateZ(50px); /* Pops out */
+        }
+
+        h3 {
+            color: #fff;
+            font-weight: 300;
+            letter-spacing: 2px;
+            margin-top: 10px;
+            transform: translateZ(30px);
+        }
+
+        .name-display {
+            font-size: 2.5rem;
+            font-weight: bold;
+            background: linear-gradient(to right, var(--secondary), var(--primary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin: 20px 0;
+            transform: translateZ(60px); /* Pops out more */
+            filter: drop-shadow(0 0 10px rgba(255, 0, 85, 0.5));
+        }
+
+        .year {
+            font-size: 5rem;
+            position: absolute;
+            top: -40px;
+            opacity: 0.1;
+            color: white;
+            font-weight: bold;
+            transform: translateZ(-50px); /* Pushed back */
+        }
+
+        /* Creator Tools */
+        .controls {
+            margin-top: 50px;
+            z-index: 100;
+            background: rgba(0,0,0,0.6);
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px solid #333;
+            text-align: center;
+            transform: translateZ(100px);
+        }
+
+        input {
+            padding: 10px;
+            border-radius: 5px;
+            border: none;
+            outline: none;
+            background: #222;
+            color: white;
+            margin-right: 10px;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px var(--primary);
+        }
+
+        /* Animations */
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotateY(0deg); }
+            50% { transform: translateY(-20px) rotateY(10deg); }
+        }
+
+        /* Firework particles simple simulation */
+        .particle {
+            position: absolute;
+            width: 5px;
+            height: 5px;
+            background: white;
+            border-radius: 50%;
+            animation: explode 1s ease-out forwards;
+        }
+
+        @keyframes explode {
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(0); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card-container" id="tiltCard">
+        <div class="card">
+            <div class="year">2026</div>
+            <h3>WISHING YOU A</h3>
+            <h1>HAPPY<br>NEW YEAR</h1>
+            <div class="name-display" id="recipientName">Friend</div>
+        </div>
+    </div>
+
+    <div class="controls">
+        <p style="color: #aaa; margin-bottom: 10px;">Send this to a friend:</p>
+        <input type="text" id="nameInput" placeholder="Enter friend's name">
+        <button onclick="generateLink()">Copy Link</button>
+        <p id="msg" style="color: #00ddff; font-size: 12px; height: 15px; margin-top: 5px;"></p>
+    </div>
+
+    <script>
+        // 1. GET NAME FROM URL
+        // This checks if the URL is website.com?name=John
+        const urlParams = new URLSearchParams(window.location.search);
+        const nameFromUrl = urlParams.get('name');
+
+        // If a name exists in URL, display it. Otherwise default to 'Friend'
+        if(nameFromUrl) {
+            document.getElementById('recipientName').innerText = nameFromUrl;
+            document.title = "Happy New Year, " + nameFromUrl + "!";
+        }
+
+        // 2. GENERATE SHARE LINK
+        function generateLink() {
+            const inputName = document.getElementById('nameInput').value.trim();
+            const msgElement = document.getElementById('msg');
+            
+            if(!inputName) {
+                msgElement.innerText = "Please enter a name first!";
+                msgElement.style.color = "red";
+                return;
+            }
+
+            // Create the new URL
+            const baseUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+            const shareUrl = `${baseUrl}?name=${encodeURIComponent(inputName)}`;
+
+            // Copy to clipboard
+            navigator.clipboard.writeText(shareUrl).then(() => {
+                msgElement.innerText = "Link copied! Send it to " + inputName;
+                msgElement.style.color = "#00ddff";
+            });
+        }
+
+        // 3. 3D TILT EFFECT MOUSE MOVEMEMENT
+        const card = document.getElementById('tiltCard');
+        const cardInner = document.querySelector('.card');
+
+        document.addEventListener('mousemove', (e) => {
+            const x = (window.innerWidth / 2 - e.pageX) / 20;
+            const y = (window.innerHeight / 2 - e.pageY) / 20;
+            
+            card.style.transform = `rotateY(${x}deg) rotateX(${y}deg)`;
+        });
+
+        // 4. SIMPLE FIREWORKS ON CLICK
+        document.addEventListener('click', (e) => {
+            createFirework(e.clientX, e.clientY);
+        });
+
+        function createFirework(x, y) {
+            const colors = ['#ff0055', '#00ddff', '#ffd700', '#ffffff'];
+            for(let i=0; i<20; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                document.body.appendChild(particle);
+                
+                const color = colors[Math.floor(Math.random() * colors.length)];
+                particle.style.background = color;
+                particle.style.left = x + 'px';
+                particle.style.top = y + 'px';
+                
+                // Random destination
+                const destX = (Math.random() - 0.5) * 200;
+                const destY = (Math.random() - 0.5) * 200;
+                
+                particle.animate([
+                    { transform: `translate(0,0)` },
+                    { transform: `translate(${destX}px, ${destY}px)` }
+                ], {
+                    duration: 1000,
+                    easing: 'cubic-bezier(0, .9, .57, 1)',
+                    delay: Math.random() * 200
+                });
+
+                setTimeout(() => particle.remove(), 1000);
+            }
+        }
+    </script>
+</body>
+</html>
